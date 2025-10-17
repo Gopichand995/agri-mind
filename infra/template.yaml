@@ -1,0 +1,157 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AgriMind Prototype - Kinesis + Lambda + S3 + API Gateway
+
+Parameters:
+  Prefix:
+    Type: String
+    Default: agrimind
+  S3BucketName:
+    Type: String
+    Default: agrimind-prototype-bucket-<YOUR_SUFFIX>
+
+Resources:
+
+  AgriMindStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub '${Prefix}-stream'
+      ShardCount: 1
+
+  AgriMindBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3BucketName
+      VersioningConfiguration: 
+        Status: Suspended
+
+  AgriMindRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Prefix}-lambda-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: AgriMindInlinePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource: !Sub 'arn:aws:s3:::${S3BucketName}/*'
+              - Effect: Allow
+                Action:
+                  - kinesis:PutRecord
+                  - kinesis:PutRecords
+                  - kinesis:GetRecords
+                  - kinesis:GetShardIterator
+                  - kinesis:DescribeStream
+                  - kinesis:ListStreams
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock-agent:InvokeAgent
+                  - bedrock-agent-runtime:InvokeAgent
+                Resource: '*'
+
+  KinesisProducerLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${Prefix}-producer'
+      Runtime: python3.11
+      Handler: producer_simulator.lambda_handler
+      Role: !GetAtt AgriMindRole.Arn
+      Timeout: 60
+      MemorySize: 128
+      Code:
+        ZipFile: |
+          # a placeholder; we'll upload real code via SAM/CLI or S3 in practice
+          def lambda_handler(event, context): 
+              return {"status":"ok"}
+
+  KinesisConsumerLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${Prefix}-kinesis-consumer'
+      Runtime: python3.11
+      Handler: kinesis_consumer.lambda_handler
+      Role: !GetAtt AgriMindRole.Arn
+      Timeout: 120
+      MemorySize: 512
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+              return {"status":"ok"}
+
+  EventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt AgriMindStream.Arn
+      FunctionName: !GetAtt KinesisConsumerLambda.Arn
+      StartingPosition: LATEST
+      BatchSize: 100
+
+  QueryLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${Prefix}-query'
+      Runtime: python3.11
+      Handler: query_api.lambda_handler
+      Role: !GetAtt AgriMindRole.Arn
+      Timeout: 30
+      MemorySize: 256
+      Code:
+        ZipFile: |
+          def lambda_handler(event, context):
+              return {"status":"ok"}
+
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub '${Prefix}-api'
+
+  ApiResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      RestApiId: !Ref ApiGatewayRestApi
+      PathPart: query
+
+  ApiMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - { LambdaArn: !GetAtt QueryLambda.Arn }
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      StageName: prod
+    DependsOn:
+      - ApiMethod
+
+Outputs:
+  StreamName:
+    Value: !Ref AgriMindStream
+  BucketName:
+    Value: !Ref S3BucketName
+  ApiInvokeUrl:
+    Value: !Sub 'https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/query'
