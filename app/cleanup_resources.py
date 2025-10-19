@@ -3,7 +3,7 @@ import boto3, time
 
 REGION = "us-east-1"
 STREAM_NAME = "AgriMindStream"
-BUCKET = "agri-mind-prototype-bucket-<YOUR_SUFFIX>"
+BUCKET = "smart-farming-tips"
 
 kinesis = boto3.client("kinesis", region_name=REGION)
 s3 = boto3.resource("s3", region_name=REGION)
