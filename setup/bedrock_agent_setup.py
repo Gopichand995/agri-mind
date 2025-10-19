@@ -31,7 +31,7 @@ def create_alias(agent_id):
     alias_name = "v1"
     response = client.create_agent_alias(
         agentId=agent_id,
-        aliasName=alias_name,
+        agentAliasName=alias_name,
         description="Primary alias for AgriMind Agent (v1)"
     )
 
