@@ -28,7 +28,7 @@ def send_record(record):
 
 if __name__ == "__main__":
     # Demo: send 6 events every 10 seconds (short run to save cost)
-    for i in range(6):
+    for i in range(1):
         rec = generate_record(f"FARM_{random.randint(1,3)}")
         print("Sending:", rec)
         send_record(rec)
