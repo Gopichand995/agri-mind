@@ -32,4 +32,4 @@ if __name__ == "__main__":
         rec = generate_record(f"FARM_{random.randint(1,3)}")
         print("Sending:", rec)
         send_record(rec)
-        time.sleep(30)
+        time.sleep(10)

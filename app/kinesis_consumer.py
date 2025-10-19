@@ -6,7 +6,7 @@ import os
 from botocore.exceptions import ClientError
 
 REGION = os.environ.get("AWS_REGION", "us-east-1")
-S3_BUCKET = os.environ.get("S3_BUCKET", "agri-mind-prototype-bucket-<YOUR_SUFFIX>")
+S3_BUCKET = os.environ.get("S3_BUCKET", "smart-farming-tips")
 AGENT_ID = os.environ.get("AGENT_ID", "replace-with-agent-id")
 AGENT_ALIAS_ID = os.environ.get("AGENT_ALIAS_ID", "replace-with-alias-id")
 
