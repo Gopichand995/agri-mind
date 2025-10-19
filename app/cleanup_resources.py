@@ -2,7 +2,7 @@
 import boto3, time
 
 REGION = "us-east-1"
-STREAM_NAME = "AgriMindStream"
+STREAM_NAME = "agrimind-stream"
 BUCKET = "smart-farming-tips"
 
 kinesis = boto3.client("kinesis", region_name=REGION)
