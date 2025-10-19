@@ -41,9 +41,28 @@ def delete_api_gateway():
     except Exception as e:
         print("⚠️ API Gateway delete error:", e)
 
+def delete_lambdas():
+    """Delete all Lambda functions starting with 'AgriMind' or 'agrimind'."""
+    try:
+        functions = lambda_client.list_functions(MaxItems=100)["Functions"]
+        to_delete = [f for f in functions if f["FunctionName"].lower().startswith("agrimind")]
+        if not to_delete:
+            print("⚠️ No Lambda functions found with prefix 'AgriMind'.")
+            return
+
+        for f in to_delete:
+            fn_name = f["FunctionName"]
+            lambda_client.delete_function(FunctionName=fn_name)
+            print(f"✅ Deleted Lambda function: {fn_name}")
+
+    except Exception as e:
+        print("⚠️ Lambda delete error:", e)
+
+
 if __name__ == "__main__":
     delete_kinesis()
     time.sleep(5)
     empty_and_delete_bucket()
     delete_api_gateway()
+    delete_lambdas()
     print("\n✅ Cleanup complete!")
