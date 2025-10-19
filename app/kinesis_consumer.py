@@ -7,8 +7,8 @@ from botocore.exceptions import ClientError
 
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 S3_BUCKET = os.environ.get("S3_BUCKET", "smart-farming-tips")
-AGENT_ID = os.environ.get("AGENT_ID", "replace-with-agent-id")
-AGENT_ALIAS_ID = os.environ.get("AGENT_ALIAS_ID", "replace-with-alias-id")
+AGENT_ID = os.environ.get("AGENT_ID", "AGTNKIPFZ6")
+AGENT_ALIAS_ID = os.environ.get("AGENT_ALIAS_ID", "NPUWEFHCAY")
 
 agent_runtime = boto3.client("bedrock-agent-runtime", region_name=REGION)
 s3 = boto3.client("s3", region_name=REGION)
