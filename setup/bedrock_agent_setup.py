@@ -51,9 +51,9 @@ def deploy_agent(agent_id):
 if __name__ == "__main__":
     agent_id = create_agent()
     time.sleep(3)
-    alias_id = create_alias(agent_id)
-    time.sleep(3)
     deploy_agent(agent_id)
+    time.sleep(3)
+    alias_id = create_alias(agent_id)
 
     result = {"agentId": agent_id, "aliasId": alias_id}
     print("\n✅ Final Agent Details:")
