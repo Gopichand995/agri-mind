@@ -17,7 +17,7 @@ def create_agent():
         description="Autonomous agent for AgriMind: analyzes IoT sensor data and recommends irrigation/fertilizer strategy.",
         instruction="You are an agronomist. Read soil, weather, and sensor context to produce a concise JSON with keys: advice, confidence, reason.",
         foundationModel=FOUNDATION_MODEL,
-        agentResourceRoleArn="arn:aws:iam::906510885130:role/BedrockAgentExecutionRole"
+        agentResourceRoleArn="arn:aws:iam::906510885130:role/BedrockAgentExecutionRole",
         orchestrationType="DEFAULT",
         idleSessionTTLInSeconds=300,
     )
