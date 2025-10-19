@@ -45,3 +45,5 @@ if __name__ == "__main__":
     delete_kinesis()
     time.sleep(5)
     empty_and_delete_bucket()
+    delete_api_gateway()
+    print("\n✅ Cleanup complete!")
