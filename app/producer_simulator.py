@@ -2,7 +2,7 @@
 import boto3, json, time, random
 from datetime import datetime
 
-STREAM_NAME = "AgriMindStream"   # adjust to CloudFormation-created stream name
+STREAM_NAME = "agrimind-stream"   # adjust to CloudFormation-created stream name
 REGION = "us-east-1"
 
 kinesis = boto3.client("kinesis", region_name=REGION)

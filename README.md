@@ -33,7 +33,7 @@ aws configure set region us-east-1
 Creates stream, S3 bucket, IAM roles, Lambdas, and API Gateway.
 
 ```bash
-aws cloudformation deploy   --template-file infra/template.yaml   --stack-name agrimind-prototype   --parameter-overrides Prefix=agrimind S3BucketName=<your-unique-bucket-name>
+aws cloudformation deploy   --template-file infra/template.yaml   --stack-name agrimind-prototype   --parameter-overrides Prefix=agrimind S3BucketName=<your-unique-bucket-name> --capabilities CAPABILITY_NAMED_IAM
 ```
 
 ---
@@ -42,12 +42,14 @@ aws cloudformation deploy   --template-file infra/template.yaml   --stack-name a
 Package and upload your application code:
 
 ```bash
-cd app/
-zip -r consumer.zip consumer/
-zip -r query.zip query/
+cd app
+zip -r ../consumer.zip kinesis_consumer.py requirements.txt
+zip -r ../query.zip query_api.py requirements.txt
+cd ..
 
-aws lambda update-function-code --function-name agrimind-consumer --zip-file fileb://consumer.zip
-aws lambda update-function-code --function-name agrimind-query --zip-file fileb://query.zip
+echo "Updating Lambda functions..."
+aws lambda update-function-code --function-name agrimind-kinesis-consumer --zip-file fileb://consumer.zip --region $REGION
+aws lambda update-function-code --function-name agrimind-query --zip-file fileb://query.zip --region $REGION
 ```
 
 Alternatively, deploy via **AWS SAM** or **Serverless Framework**.
