@@ -4,6 +4,7 @@ import boto3, time
 REGION = "us-east-1"
 STREAM_NAME = "agrimind-stream"
 BUCKET = "smart-farming-tips"
+API_NAME = "agrimind-api"
 
 kinesis = boto3.client("kinesis", region_name=REGION)
 s3 = boto3.resource("s3", region_name=REGION)
@@ -25,6 +26,20 @@ def empty_and_delete_bucket():
         print("Deleted bucket")
     except Exception as e:
         print("S3 delete error:", e)
+
+def delete_api_gateway():
+    """Find and delete the API Gateway REST API by name."""
+    try:
+        apis = apigw.get_rest_apis(limit=500)
+        target_api = next((api for api in apis["items"] if api["name"] == API_NAME), None)
+        if not target_api:
+            print(f"⚠️ API Gateway named '{API_NAME}' not found.")
+            return
+        api_id = target_api["id"]
+        apigw.delete_rest_api(restApiId=api_id)
+        print(f"✅ Deleted API Gateway: {API_NAME} (ID: {api_id})")
+    except Exception as e:
+        print("⚠️ API Gateway delete error:", e)
 
 if __name__ == "__main__":
     delete_kinesis()
