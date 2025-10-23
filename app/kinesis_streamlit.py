@@ -6,7 +6,7 @@ import datetime
 
 # --- AWS Kinesis setup ---
 STREAM_NAME = "test-stream"
-kinesis = boto3.client("kinesis")
+kinesis = boto3.client("kinesis", region_name="us-east-1")
 
 # --- Functions ---
 def send_event(user_id: str, action: str):
